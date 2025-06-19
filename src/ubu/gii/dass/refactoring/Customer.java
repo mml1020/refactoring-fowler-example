@@ -31,27 +31,26 @@ public class Customer {
 	};
 
 	public String statement() {
+		return generateStatement(new TextStatementFormatter());
+	}
+	
+	public String htmlStatement() {
+		return generateStatement(new HtmlStatementFormatter());
+	}
+	
+	private String generateStatement(StatementFormatter formatter) {
 		double totalAmount = 0;
 		int frequentRenterPoints = 0;
-		Iterator<Rental> rentals = _rentals.iterator();
-		String result = "Rental Record for " + getName() + "\n";
-		while (rentals.hasNext()) {
-			double thisAmount = 0;
-			Rental each = rentals.next();
-			
-			thisAmount = each.getCharge();
-			
-			// add frequent renter points
+		String result = formatter.formatHeader(getName());
+		
+		for (Rental each : _rentals) {
+			double thisAmount = each.getCharge();
 			frequentRenterPoints += each.getFrequentRenterPoints();
-			// show figures for this rental
-			result += "\t" + each.getMovie().getTitle() + "\t"
-					+ String.valueOf(thisAmount) + "\n";
+			result += formatter.formatRental(each.getMovie().getTitle(), thisAmount);
 			totalAmount += thisAmount;
 		}
-		// add footer lines
-		result += "Amount owed is " + String.valueOf(totalAmount) + "\n";
-		result += "You earned " + String.valueOf(frequentRenterPoints)
-				+ " frequent renter points";
+		
+		result += formatter.formatFooter(totalAmount, frequentRenterPoints);
 		return result;
 	}
 	
